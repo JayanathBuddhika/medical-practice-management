@@ -1,0 +1,63 @@
+{
+  "family": "medical-practice-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::ACCOUNT-ID:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::ACCOUNT-ID:role/ecsTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "medical-practice-container",
+      "image": "ACCOUNT-ID.dkr.ecr.REGION.amazonaws.com/medical-practice:latest",
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "hostPort": 3000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "NODE_ENV",
+          "value": "production"
+        },
+        {
+          "name": "PORT",
+          "value": "3000"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "DATABASE_URL",
+          "valueFrom": "arn:aws:ssm:REGION:ACCOUNT-ID:parameter/medical-practice/database-url"
+        },
+        {
+          "name": "NEXTAUTH_SECRET",
+          "valueFrom": "arn:aws:ssm:REGION:ACCOUNT-ID:parameter/medical-practice/nextauth-secret"
+        },
+        {
+          "name": "JWT_SECRET",
+          "valueFrom": "arn:aws:ssm:REGION:ACCOUNT-ID:parameter/medical-practice/jwt-secret"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/medical-practice",
+          "awslogs-region": "REGION",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "curl -f http://localhost:3000/api/health || exit 1"
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3
+      }
+    }
+  ]
+}

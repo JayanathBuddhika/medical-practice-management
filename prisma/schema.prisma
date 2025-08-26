@@ -1,0 +1,353 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      UserRole @default(DOCTOR)
+  name      String
+  phone     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  doctorProfile     Doctor?
+  sessions          Session[]
+  createdPatients   Patient[] @relation("CreatedByUser")
+  createdAppointments Appointment[] @relation("CreatedAppointments")
+  
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  sessionToken String @unique
+  userId    String
+  expires   DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("sessions")
+}
+
+model Doctor {
+  id              String  @id @default(cuid())
+  userId          String  @unique
+  licenseNumber   String  @unique
+  specialization  String
+  qualification   String
+  experience      Int
+  consultationFee Int     @default(500)
+
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  consultations  Consultation[]
+  prescriptions  Prescription[]
+  appointments   Appointment[]
+  
+  @@map("doctors")
+}
+
+model Patient {
+  id          String      @id @default(cuid())
+  patientId   String      @unique
+  firstName   String
+  lastName    String
+  dateOfBirth DateTime
+  gender      Gender
+  phone       String
+  email       String?
+  address     String?
+  bloodGroup  BloodGroup?
+  allergies   String?
+  emergency   Json? // {contact: string, name: string, relation: string}
+  createdById String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relationships
+  createdBy      User           @relation("CreatedByUser", fields: [createdById], references: [id])
+  consultations  Consultation[]
+  prescriptions  Prescription[]
+  investigations Investigation[]
+  bills          Bill[]
+  vitals         Vitals[]
+  appointments   Appointment[]
+  
+  @@map("patients")
+}
+
+model Appointment {
+  id           String            @id @default(cuid())
+  patientId    String
+  doctorId     String?
+  appointmentDate DateTime
+  timeSlot     String // "09:00-09:30", "14:00-14:30", etc.
+  status       AppointmentStatus @default(SCHEDULED)
+  purpose      String?
+  notes        String?
+  tokenNumber  String?
+  priority     Priority         @default(NORMAL)
+  createdById  String
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  // Relationships
+  patient     Patient @relation(fields: [patientId], references: [id])
+  doctor      Doctor? @relation(fields: [doctorId], references: [id])
+  createdBy   User    @relation("CreatedAppointments", fields: [createdById], references: [id])
+  
+  @@map("appointments")
+}
+
+model Consultation {
+  id            String            @id @default(cuid())
+  patientId     String
+  doctorId      String
+  tokenNumber   String
+  visitType     VisitType
+  status        ConsultationStatus @default(WAITING)
+  scheduledTime DateTime
+  startTime     DateTime?
+  endTime       DateTime?
+  
+  // Clinical Data
+  chiefComplaints      String?
+  historyPresent       String?
+  historyPast          String?
+  generalExamination   String?
+  systemicExamination  String?
+  localExamination     String?
+  provisionalDiagnosis String?
+  differentialDiagnosis String?
+  finalDiagnosis       String?
+  icd10Code            String?
+  followupAfter        String?
+  generalAdvice        String?
+  redFlagSymptoms      String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  patient       Patient        @relation(fields: [patientId], references: [id])
+  doctor        Doctor         @relation(fields: [doctorId], references: [id])
+  vitals        Vitals[]
+  prescriptions Prescription[]
+  investigations Investigation[]
+  bills         Bill[]
+  
+  @@map("consultations")
+}
+
+model Vitals {
+  id               String  @id @default(cuid())
+  consultationId   String
+  patientId        String
+  bloodPressure    String? // "120/80"
+  pulseRate        Int?
+  temperature      Float?
+  weight           Float?
+  height           Float?
+  spo2             Int?
+  bmi              Float?
+  recordedAt       DateTime @default(now())
+
+  consultation Consultation @relation(fields: [consultationId], references: [id])
+  patient      Patient      @relation(fields: [patientId], references: [id])
+  
+  @@map("vitals")
+}
+
+model Prescription {
+  id             String @id @default(cuid())
+  consultationId String
+  patientId      String
+  doctorId       String
+  
+  items      PrescriptionItem[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  consultation Consultation @relation(fields: [consultationId], references: [id])
+  patient      Patient      @relation(fields: [patientId], references: [id])
+  doctor       Doctor       @relation(fields: [doctorId], references: [id])
+  
+  @@map("prescriptions")
+}
+
+model PrescriptionItem {
+  id             String @id @default(cuid())
+  prescriptionId String
+  drugName       String
+  dosage         String // "1-1-1", "1-0-1", etc.
+  duration       String
+  instructions   String?
+
+  prescription Prescription @relation(fields: [prescriptionId], references: [id], onDelete: Cascade)
+  
+  @@map("prescription_items")
+}
+
+model PrescriptionTemplate {
+  id          String                   @id @default(cuid())
+  name        String
+  description String?
+  items       PrescriptionTemplateItem[]
+  createdAt   DateTime                 @default(now())
+  
+  @@map("prescription_templates")
+}
+
+model PrescriptionTemplateItem {
+  id         String @id @default(cuid())
+  templateId String
+  drugName   String
+  dosage     String
+  duration   String
+  instructions String?
+
+  template PrescriptionTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  
+  @@map("prescription_template_items")
+}
+
+model Investigation {
+  id             String              @id @default(cuid())
+  consultationId String
+  patientId      String
+  
+  testName       String
+  testType       InvestigationType
+  labName        String?
+  status         InvestigationStatus @default(PENDING)
+  orderedAt      DateTime            @default(now())
+  resultDate     DateTime?
+  reportUrl      String?
+  findings       String?
+  doctorNotes    String?
+
+  consultation Consultation @relation(fields: [consultationId], references: [id])
+  patient      Patient      @relation(fields: [patientId], references: [id])
+  
+  @@map("investigations")
+}
+
+model Bill {
+  id                String        @id @default(cuid())
+  billNumber        String        @unique
+  consultationId    String
+  patientId         String
+  
+  consultationFee   Int
+  procedureCharges  Int           @default(0)
+  otherCharges      Int           @default(0)
+  discount          Int           @default(0)
+  totalAmount       Int
+  paidAmount        Int           @default(0)
+  paymentMode       PaymentMode?
+  paymentStatus     PaymentStatus @default(PENDING)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  consultation Consultation @relation(fields: [consultationId], references: [id])
+  patient      Patient      @relation(fields: [patientId], references: [id])
+  
+  @@map("bills")
+}
+
+// Enums
+enum UserRole {
+  ADMIN
+  DOCTOR
+  NURSE
+  RECEPTIONIST
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum BloodGroup {
+  A_POSITIVE
+  A_NEGATIVE
+  B_POSITIVE
+  B_NEGATIVE
+  AB_POSITIVE
+  AB_NEGATIVE
+  O_POSITIVE
+  O_NEGATIVE
+}
+
+enum VisitType {
+  NEW_VISIT
+  FOLLOW_UP
+  REVIEW
+  EMERGENCY
+}
+
+enum ConsultationStatus {
+  WAITING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum InvestigationType {
+  BLOOD_TEST
+  URINE_TEST
+  IMAGING
+  ECG
+  OTHER
+}
+
+enum InvestigationStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMode {
+  CASH
+  UPI
+  CARD
+  ONLINE_TRANSFER
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  PARTIAL
+  CANCELLED
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum Priority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
