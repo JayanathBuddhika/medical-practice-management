@@ -22,10 +22,11 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relationships
-  doctorProfile     Doctor?
-  sessions          Session[]
-  createdPatients   Patient[] @relation("CreatedByUser")
+  doctorProfile       Doctor?
+  sessions            Session[]
+  createdPatients     Patient[] @relation("CreatedByUser")
   createdAppointments Appointment[] @relation("CreatedAppointments")
+  userPrivileges      UserPrivilege[]
   
   @@map("users")
 }
@@ -350,4 +351,93 @@ enum Priority {
   NORMAL
   HIGH
   URGENT
+}
+
+// User Privilege Models
+model UserPrivilege {
+  id         String    @id @default(cuid())
+  userId     String
+  privilege  Privilege
+  granted    Boolean   @default(true)
+  grantedBy  String?
+  grantedAt  DateTime  @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, privilege])
+  @@map("user_privileges")
+}
+
+model RolePrivilege {
+  id        String    @id @default(cuid())
+  role      UserRole
+  privilege Privilege
+  isDefault Boolean   @default(true)
+  
+  @@unique([role, privilege])
+  @@map("role_privileges")
+}
+
+enum Privilege {
+  // Dashboard Access
+  VIEW_DASHBOARD
+  
+  // Patient Management
+  VIEW_PATIENTS
+  CREATE_PATIENTS
+  EDIT_PATIENTS
+  DELETE_PATIENTS
+  
+  // Appointment Management
+  VIEW_APPOINTMENTS
+  CREATE_APPOINTMENTS
+  EDIT_APPOINTMENTS
+  DELETE_APPOINTMENTS
+  CANCEL_APPOINTMENTS
+  
+  // Consultation Management
+  VIEW_CONSULTATIONS
+  START_CONSULTATION
+  COMPLETE_CONSULTATION
+  EDIT_CONSULTATIONS
+  
+  // Prescription Management
+  VIEW_PRESCRIPTIONS
+  CREATE_PRESCRIPTIONS
+  EDIT_PRESCRIPTIONS
+  DELETE_PRESCRIPTIONS
+  PRINT_PRESCRIPTIONS
+  
+  // Investigation Management
+  VIEW_INVESTIGATIONS
+  ORDER_INVESTIGATIONS
+  EDIT_INVESTIGATIONS
+  VIEW_LAB_REPORTS
+  UPLOAD_REPORTS
+  
+  // Billing Management
+  VIEW_BILLS
+  CREATE_BILLS
+  EDIT_BILLS
+  PROCESS_PAYMENTS
+  VIEW_REVENUE_REPORTS
+  
+  // Reports and Analytics
+  VIEW_REPORTS
+  EXPORT_DATA
+  VIEW_ANALYTICS
+  
+  // User Management (Admin only)
+  VIEW_USERS
+  CREATE_USERS
+  EDIT_USERS
+  DELETE_USERS
+  MANAGE_PRIVILEGES
+  RESET_PASSWORDS
+  
+  // System Administration
+  BACKUP_DATA
+  RESTORE_DATA
+  SYSTEM_SETTINGS
+  VIEW_AUDIT_LOGS
 }

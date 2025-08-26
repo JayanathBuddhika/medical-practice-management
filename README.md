@@ -1,6 +1,72 @@
-# MediCare Private Practice - Clinical Management System
+# 🏥 MediCare Private Practice Management System
 
-A comprehensive, mobile-responsive clinical practice management web application built with modern technologies and designed for healthcare professionals.
+A comprehensive clinical management system built with Next.js 15, featuring role-based access control, patient management, consultations, prescriptions, billing, and more.
+
+## 🌐 Live Demo
+
+**🔗 [View Live Application](https://medical-practice-management-ten.vercel.app/)**
+
+## 🎯 Demo Accounts
+
+All demo accounts use the password: **`password123`**
+
+| Role | Email | Access Level |
+|------|-------|--------------|
+| 👑 **Admin** | `admin@medicare.com` | Full system access, user management, role configuration |
+| 👨‍⚕️ **Doctor** | `doctor@medicare.com` | Patient care, consultations, prescriptions, investigations |
+| 👩‍⚕️ **Nurse** | `nurse@medicare.com` | Patient support, vitals, lab reports |
+| 🏢 **Receptionist** | `receptionist@medicare.com` | Appointments, patient registration, billing |
+
+## ✨ Key Features
+
+### 🔐 Advanced Role Management
+- **Custom Role Configuration**: Admin can assign specific privileges to each role
+- **Granular Permissions**: 40+ fine-grained privileges across all modules
+- **Dynamic Access Control**: Real-time privilege enforcement
+- **User Management**: Create, edit, and manage users with role-specific access
+
+### 👥 Patient Management
+- Complete patient profiles with medical history
+- Emergency contact information
+- Blood group and allergy tracking
+- Comprehensive patient search and filtering
+
+### 📅 Appointment System
+- Interactive appointment scheduling
+- Multiple time slot management
+- Priority-based booking (Normal, High, Urgent)
+- Real-time appointment status tracking
+
+### 🩺 Consultation Workflow
+- Token-based patient queue management
+- Comprehensive clinical documentation
+- Chief complaints and examination records
+- Provisional and final diagnosis tracking
+- ICD-10 code integration
+
+### 💊 Prescription Management
+- Digital prescription creation
+- Medicine dosage and duration tracking
+- Prescription templates for common conditions
+- Print-ready prescription format
+
+### 🔬 Investigation Management
+- Lab test ordering and tracking
+- Multiple investigation types (Blood, Urine, Imaging, ECG)
+- Result management and report storage
+- Integration with external labs
+
+### 💰 Billing & Finance
+- Automated bill generation
+- Multiple payment modes (Cash, UPI, Card, Online)
+- Payment status tracking
+- Consultation fee management
+
+### 📊 Analytics & Reports
+- Real-time dashboard with key metrics
+- Patient visit analytics
+- Revenue tracking
+- Investigation status reports
 
 ## 🚀 Features
 

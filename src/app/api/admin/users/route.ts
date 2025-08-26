@@ -14,7 +14,8 @@ export async function GET(request: NextRequest) {
 
     const users = await prisma.user.findMany({
       include: {
-        doctorProfile: true
+        doctorProfile: true,
+        userPrivileges: true
       },
       orderBy: {
         createdAt: 'desc'
@@ -112,11 +113,25 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    // Assign default privileges based on role
+    const defaultPrivileges = await getDefaultPrivilegesForRole(role)
+    if (defaultPrivileges.length > 0) {
+      await prisma.userPrivilege.createMany({
+        data: defaultPrivileges.map(privilege => ({
+          userId: user.id,
+          privilege,
+          granted: true,
+          grantedBy: session.user.id
+        }))
+      })
+    }
+
     // Fetch the created user with doctor profile if applicable
     const createdUser = await prisma.user.findUnique({
       where: { id: user.id },
       include: {
-        doctorProfile: true
+        doctorProfile: true,
+        userPrivileges: true
       }
     })
 
@@ -128,4 +143,43 @@ export async function POST(request: NextRequest) {
     console.error('Error creating user:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
+}
+
+// Helper function to get default privileges for a role
+async function getDefaultPrivilegesForRole(role: string): Promise<string[]> {
+  const rolePrivilegesMap: Record<string, string[]> = {
+    ADMIN: [
+      'VIEW_DASHBOARD', 'VIEW_PATIENTS', 'CREATE_PATIENTS', 'EDIT_PATIENTS', 'DELETE_PATIENTS',
+      'VIEW_APPOINTMENTS', 'CREATE_APPOINTMENTS', 'EDIT_APPOINTMENTS', 'DELETE_APPOINTMENTS', 'CANCEL_APPOINTMENTS',
+      'VIEW_CONSULTATIONS', 'START_CONSULTATION', 'COMPLETE_CONSULTATION', 'EDIT_CONSULTATIONS',
+      'VIEW_PRESCRIPTIONS', 'CREATE_PRESCRIPTIONS', 'EDIT_PRESCRIPTIONS', 'DELETE_PRESCRIPTIONS', 'PRINT_PRESCRIPTIONS',
+      'VIEW_INVESTIGATIONS', 'ORDER_INVESTIGATIONS', 'EDIT_INVESTIGATIONS', 'VIEW_LAB_REPORTS', 'UPLOAD_REPORTS',
+      'VIEW_BILLS', 'CREATE_BILLS', 'EDIT_BILLS', 'PROCESS_PAYMENTS', 'VIEW_REVENUE_REPORTS',
+      'VIEW_REPORTS', 'EXPORT_DATA', 'VIEW_ANALYTICS',
+      'VIEW_USERS', 'CREATE_USERS', 'EDIT_USERS', 'DELETE_USERS', 'MANAGE_PRIVILEGES', 'RESET_PASSWORDS',
+      'BACKUP_DATA', 'RESTORE_DATA', 'SYSTEM_SETTINGS', 'VIEW_AUDIT_LOGS'
+    ],
+    DOCTOR: [
+      'VIEW_DASHBOARD', 'VIEW_PATIENTS', 'CREATE_PATIENTS', 'EDIT_PATIENTS',
+      'VIEW_APPOINTMENTS', 'CREATE_APPOINTMENTS', 'EDIT_APPOINTMENTS',
+      'VIEW_CONSULTATIONS', 'START_CONSULTATION', 'COMPLETE_CONSULTATION', 'EDIT_CONSULTATIONS',
+      'VIEW_PRESCRIPTIONS', 'CREATE_PRESCRIPTIONS', 'EDIT_PRESCRIPTIONS', 'PRINT_PRESCRIPTIONS',
+      'VIEW_INVESTIGATIONS', 'ORDER_INVESTIGATIONS', 'EDIT_INVESTIGATIONS', 'VIEW_LAB_REPORTS',
+      'VIEW_BILLS', 'CREATE_BILLS'
+    ],
+    NURSE: [
+      'VIEW_DASHBOARD', 'VIEW_PATIENTS', 'EDIT_PATIENTS',
+      'VIEW_APPOINTMENTS', 'CREATE_APPOINTMENTS', 'EDIT_APPOINTMENTS',
+      'VIEW_CONSULTATIONS', 'VIEW_PRESCRIPTIONS',
+      'VIEW_INVESTIGATIONS', 'VIEW_LAB_REPORTS', 'UPLOAD_REPORTS',
+      'VIEW_BILLS'
+    ],
+    RECEPTIONIST: [
+      'VIEW_DASHBOARD', 'VIEW_PATIENTS', 'CREATE_PATIENTS', 'EDIT_PATIENTS',
+      'VIEW_APPOINTMENTS', 'CREATE_APPOINTMENTS', 'EDIT_APPOINTMENTS', 'CANCEL_APPOINTMENTS',
+      'VIEW_BILLS', 'CREATE_BILLS', 'PROCESS_PAYMENTS'
+    ]
+  }
+
+  return rolePrivilegesMap[role] || []
 }

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
-import { UserManagementModule } from './UserManagementModule'
+import { UserAndRoleManagement } from './UserAndRoleManagement'
 import { SystemConfigModule } from './SystemConfigModule'
 
 export function AdminModule() {
@@ -41,7 +41,7 @@ export function AdminModule() {
       </div>
 
       {/* Admin Content */}
-      {activeTab === 'users' && <UserManagementModule />}
+      {activeTab === 'users' && <UserAndRoleManagement />}
       {activeTab === 'config' && <SystemConfigModule />}
     </div>
   )

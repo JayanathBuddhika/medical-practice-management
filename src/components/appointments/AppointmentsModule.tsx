@@ -170,76 +170,83 @@ export function AppointmentsModule() {
   }
 
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-header">
-        <div>
-          <h1>📅 Appointment Management</h1>
-          <p>Schedule and manage patient appointments for today's practice</p>
+    <div className="appointments-container">
+      <div className="appointments-header">
+        <div className="header-content">
+          <h1 className="appointments-title">📅 Appointment Management</h1>
+          <p className="appointments-subtitle">Schedule and manage patient appointments for today's practice</p>
         </div>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+        <div className="header-actions">
           <input
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="form-input"
-            style={{ width: 'auto' }}
+            className="date-input"
           />
           <button 
             onClick={() => setShowNewAppointment(true)}
-            className="btn btn-primary"
+            className="btn btn-primary schedule-btn"
           >
             📅 Schedule New
           </button>
         </div>
       </div>
 
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon">📊</div>
-          <div className="stat-content">
-            <h3>{appointments.length}</h3>
-            <p>Total Appointments</p>
+      <div className="appointments-stats-grid">
+        <div className="appointments-stat-card">
+          <div className="stat-icon-wrapper">
+            <div className="stat-icon">📊</div>
+          </div>
+          <div className="stat-info">
+            <div className="stat-number">{appointments.length}</div>
+            <div className="stat-label">Total Appointments</div>
           </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-icon">✅</div>
-          <div className="stat-content">
-            <h3>{appointments.filter(apt => apt.status === 'CONFIRMED').length}</h3>
-            <p>Confirmed</p>
+        <div className="appointments-stat-card">
+          <div className="stat-icon-wrapper">
+            <div className="stat-icon">✅</div>
+          </div>
+          <div className="stat-info">
+            <div className="stat-number">{appointments.filter(apt => apt.status === 'CONFIRMED').length}</div>
+            <div className="stat-label">Confirmed</div>
           </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-icon">🔄</div>
-          <div className="stat-content">
-            <h3>{appointments.filter(apt => apt.status === 'IN_PROGRESS').length}</h3>
-            <p>In Progress</p>
+        <div className="appointments-stat-card">
+          <div className="stat-icon-wrapper">
+            <div className="stat-icon">🔄</div>
+          </div>
+          <div className="stat-info">
+            <div className="stat-number">{appointments.filter(apt => apt.status === 'IN_PROGRESS').length}</div>
+            <div className="stat-label">In Progress</div>
           </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-icon">⏰</div>
-          <div className="stat-content">
-            <h3>{getAvailableSlots().length}</h3>
-            <p>Available Slots</p>
+        <div className="appointments-stat-card">
+          <div className="stat-icon-wrapper">
+            <div className="stat-icon">⏰</div>
+          </div>
+          <div className="stat-info">
+            <div className="stat-number">{getAvailableSlots().length}</div>
+            <div className="stat-label">Available Slots</div>
           </div>
         </div>
       </div>
 
       {showNewAppointment && (
-        <div className="overlay" onClick={() => setShowNewAppointment(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>📅 Schedule New Appointment</h3>
-              <button onClick={() => setShowNewAppointment(false)} className="close-btn">×</button>
+        <div className="appointment-modal-overlay" onClick={() => setShowNewAppointment(false)}>
+          <div className="appointment-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="appointment-modal-header">
+              <h3 className="modal-title">📅 Schedule New Appointment</h3>
+              <button onClick={() => setShowNewAppointment(false)} className="modal-close-btn">×</button>
             </div>
-            <div className="modal-content">
-              <form onSubmit={handleCreateAppointment}>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">Patient</label>
+            <div className="appointment-modal-content">
+              <form onSubmit={handleCreateAppointment} className="appointment-form">
+                <div className="appointment-form-row">
+                  <div className="appointment-form-group">
+                    <label className="appointment-form-label">Patient</label>
                     <select
                       value={newAppointment.patientId}
                       onChange={(e) => setNewAppointment({...newAppointment, patientId: e.target.value})}
-                      className="form-input"
+                      className="appointment-form-select"
                       required
                     >
                       <option value="">Select Patient</option>
@@ -250,25 +257,25 @@ export function AppointmentsModule() {
                       ))}
                     </select>
                   </div>
-                  <div className="form-group">
-                    <label className="form-label">Date</label>
+                  <div className="appointment-form-group">
+                    <label className="appointment-form-label">Date</label>
                     <input
                       type="date"
                       value={newAppointment.appointmentDate}
                       onChange={(e) => setNewAppointment({...newAppointment, appointmentDate: e.target.value})}
-                      className="form-input"
+                      className="appointment-form-input"
                       required
                     />
                   </div>
                 </div>
 
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">Time Slot</label>
+                <div className="appointment-form-row">
+                  <div className="appointment-form-group">
+                    <label className="appointment-form-label">Time Slot</label>
                     <select
                       value={newAppointment.timeSlot}
                       onChange={(e) => setNewAppointment({...newAppointment, timeSlot: e.target.value})}
-                      className="form-input"
+                      className="appointment-form-select"
                       required
                     >
                       {getAvailableSlots().map((slot) => (
@@ -276,12 +283,12 @@ export function AppointmentsModule() {
                       ))}
                     </select>
                   </div>
-                  <div className="form-group">
-                    <label className="form-label">Priority</label>
+                  <div className="appointment-form-group">
+                    <label className="appointment-form-label">Priority</label>
                     <select
                       value={newAppointment.priority}
                       onChange={(e) => setNewAppointment({...newAppointment, priority: e.target.value as any})}
-                      className="form-input"
+                      className="appointment-form-select"
                       required
                     >
                       <option value="LOW">Low</option>
@@ -292,33 +299,33 @@ export function AppointmentsModule() {
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Purpose</label>
+                <div className="appointment-form-group">
+                  <label className="appointment-form-label">Purpose</label>
                   <input
                     type="text"
                     value={newAppointment.purpose}
                     onChange={(e) => setNewAppointment({...newAppointment, purpose: e.target.value})}
-                    className="form-input"
+                    className="appointment-form-input"
                     placeholder="Consultation, Follow-up, Check-up..."
                   />
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Notes</label>
+                <div className="appointment-form-group">
+                  <label className="appointment-form-label">Notes</label>
                   <textarea
                     value={newAppointment.notes}
                     onChange={(e) => setNewAppointment({...newAppointment, notes: e.target.value})}
-                    className="form-input"
+                    className="appointment-form-textarea"
                     rows={3}
                     placeholder="Any special instructions or notes..."
                   />
                 </div>
 
-                <div className="modal-footer">
-                  <button type="button" onClick={() => setShowNewAppointment(false)} className="btn btn-secondary">
+                <div className="appointment-modal-footer">
+                  <button type="button" onClick={() => setShowNewAppointment(false)} className="btn btn-secondary modal-cancel-btn">
                     Cancel
                   </button>
-                  <button type="submit" className="btn btn-primary">
+                  <button type="submit" className="btn btn-primary modal-submit-btn">
                     Schedule Appointment
                   </button>
                 </div>
@@ -328,68 +335,68 @@ export function AppointmentsModule() {
         </div>
       )}
 
-      <div className="data-table">
-        <div className="table-header">
-          <h3>📋 Today's Appointment Schedule - {new Date(selectedDate).toLocaleDateString()}</h3>
+      <div className="appointments-schedule-container">
+        <div className="appointments-table-header">
+          <h3 className="schedule-title">📋 Today's Appointment Schedule - {new Date(selectedDate).toLocaleDateString()}</h3>
         </div>
         
         {appointments.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>📅</div>
-            <h3>No appointments scheduled</h3>
-            <p>Click "Schedule New" to add the first appointment for this date</p>
+          <div className="appointments-empty-state">
+            <div className="empty-icon">📅</div>
+            <h3 className="empty-title">No appointments scheduled</h3>
+            <p className="empty-description">Click "Schedule New" to add the first appointment for this date</p>
           </div>
         ) : (
-          <div className="appointment-timeline">
+          <div className="appointments-timeline">
             {appointments.sort((a, b) => a.timeSlot.localeCompare(b.timeSlot)).map((appointment) => (
-              <div key={appointment.id} className="appointment-slot">
-                <div className="appointment-time">
-                  <div className="time-slot">{appointment.timeSlot}</div>
+              <div key={appointment.id} className="appointment-card">
+                <div className="appointment-time-section">
+                  <div className="appointment-time-slot">{appointment.timeSlot}</div>
                   {appointment.tokenNumber && (
-                    <div className="token-number">{appointment.tokenNumber}</div>
+                    <div className="appointment-token">{appointment.tokenNumber}</div>
                   )}
                 </div>
                 
-                <div className="appointment-details">
-                  <div className="patient-info">
-                    <h4>{appointment.patient.firstName} {appointment.patient.lastName}</h4>
-                    <p>📞 {appointment.patient.phone} • 👤 {appointment.patient.patientId}</p>
+                <div className="appointment-content">
+                  <div className="appointment-patient-info">
+                    <h4 className="patient-name">{appointment.patient.firstName} {appointment.patient.lastName}</h4>
+                    <p className="patient-details">📞 {appointment.patient.phone} • 👤 {appointment.patient.patientId}</p>
                   </div>
                   
                   {appointment.purpose && (
                     <div className="appointment-purpose">
-                      <strong>Purpose:</strong> {appointment.purpose}
+                      <span className="purpose-label">Purpose:</span> {appointment.purpose}
                     </div>
                   )}
                   
                   {appointment.notes && (
                     <div className="appointment-notes">
-                      <strong>Notes:</strong> {appointment.notes}
+                      <span className="notes-label">Notes:</span> {appointment.notes}
                     </div>
                   )}
                 </div>
                 
-                <div className="appointment-actions">
-                  <div className="status-priority">
+                <div className="appointment-status-actions">
+                  <div className="appointment-badges">
                     <span 
-                      className="status-badge" 
+                      className="appointment-status-badge" 
                       style={{ backgroundColor: statusColors[appointment.status] }}
                     >
                       {appointment.status.replace('_', ' ')}
                     </span>
                     <span 
-                      className="priority-badge" 
+                      className="appointment-priority-badge" 
                       style={{ color: priorityColors[appointment.priority] }}
                     >
                       {appointment.priority}
                     </span>
                   </div>
                   
-                  <div className="action-buttons">
+                  <div className="appointment-action-buttons">
                     {appointment.status === 'SCHEDULED' && (
                       <button
                         onClick={() => updateAppointmentStatus(appointment.id, 'CONFIRMED')}
-                        className="btn-icon confirm"
+                        className="appointment-action-btn confirm-btn"
                         title="Confirm Appointment"
                       >
                         ✅
@@ -399,7 +406,7 @@ export function AppointmentsModule() {
                     {appointment.status === 'CONFIRMED' && (
                       <button
                         onClick={() => updateAppointmentStatus(appointment.id, 'IN_PROGRESS')}
-                        className="btn-icon start"
+                        className="appointment-action-btn start-btn"
                         title="Start Consultation"
                       >
                         🏃‍♂️
@@ -409,7 +416,7 @@ export function AppointmentsModule() {
                     {appointment.status === 'IN_PROGRESS' && (
                       <button
                         onClick={() => updateAppointmentStatus(appointment.id, 'COMPLETED')}
-                        className="btn-icon complete"
+                        className="appointment-action-btn complete-btn"
                         title="Mark Complete"
                       >
                         ✅
@@ -419,7 +426,7 @@ export function AppointmentsModule() {
                     {(appointment.status === 'SCHEDULED' || appointment.status === 'CONFIRMED') && (
                       <button
                         onClick={() => updateAppointmentStatus(appointment.id, 'CANCELLED')}
-                        className="btn-icon cancel"
+                        className="appointment-action-btn cancel-btn"
                         title="Cancel Appointment"
                       >
                         ❌
